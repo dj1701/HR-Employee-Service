@@ -1,4 +1,3 @@
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 
@@ -12,7 +11,6 @@ namespace HREmployeeService.OwinPipeline.Middleware
 
         public override Task Invoke(IOwinContext context)
         {
-            context.Response.StatusCode = 200;
             return context.Response.WriteAsync("pong");
         }
     }
