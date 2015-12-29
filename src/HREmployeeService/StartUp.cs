@@ -1,5 +1,8 @@
 using System;
-using HREmployeeService.OwinPipeline.Middleware;
+using System.Web.Http;
+using Autofac;
+using Autofac.Integration.WebApi;
+using HREmployeeService.Autofac;
 using Owin;
 
 namespace HREmployeeService
@@ -7,9 +10,15 @@ namespace HREmployeeService
     public class StartUp : IDisposable
     {
         private bool _dispose = false;
+        private readonly IContainer _container;
 
         public StartUp()
         {
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new ControllerModule());
+
+            _container = builder.Build();
+
             AppDomain.CurrentDomain.UnhandledException += UnhandledException;
         }
 
@@ -20,7 +29,14 @@ namespace HREmployeeService
 
         public void Configuration(IAppBuilder app)
         {
-            app.Map("/private/ping", x => x.Use<Ping>());
+            var config = new HttpConfiguration();
+            config.DependencyResolver = new AutofacWebApiDependencyResolver(_container);
+            config.MapHttpAttributeRoutes();
+            config.EnsureInitialized();
+
+            app.UseAutofacMiddleware(_container);
+            app.UseAutofacWebApi(config);
+            app.UseWebApi(config);
         }
 
         public void Dispose()

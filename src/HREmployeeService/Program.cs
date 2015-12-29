@@ -19,7 +19,7 @@ namespace HREmployeeService
   
             try
             {
-                using (var it = WebApp.Start<StartUp>(url))
+                using (WebApp.Start<StartUp>(url))
                 {
                     Console.WriteLine("HR Employee Service has been started with '{0}', press Ctrl+C to exit", url);
 

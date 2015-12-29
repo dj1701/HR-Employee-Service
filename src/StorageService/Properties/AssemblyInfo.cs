@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("HREmployeeService.OwinPipeLine")]
+[assembly: AssemblyTitle("StorageService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("HREmployeeService.OwinPipeLine")]
+[assembly: AssemblyProduct("StorageService")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("82d6c158-4bc9-4501-97a5-f9792f1e932c")]
+[assembly: Guid("baaddde1-becd-4c80-8574-35267a57c776")]
 
 // Version information for an assembly consists of the following four values:
 //
