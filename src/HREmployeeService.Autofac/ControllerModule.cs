@@ -8,7 +8,7 @@ namespace HREmployeeService.Autofac
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<PingController>();
-//          builder.RegisterType<EmployeeController>();
+            builder.RegisterType<EmployeeController>();
         }
     }
 }

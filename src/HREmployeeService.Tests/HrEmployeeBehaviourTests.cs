@@ -13,7 +13,7 @@ namespace HREmployeeService.Tests
     public class HrEmployeeBehaviourTests
     {
         private TestServer _server;
-        private Employee _employee;
+        private TestClass _testClass;
         private string _payloadField;
         private string _payloadData;
         private Dictionary<string, string> _validPayLoad;
@@ -23,7 +23,7 @@ namespace HREmployeeService.Tests
         {
             _server = TestServer.Create<StartUp>();
 
-            _employee = new Employee
+            _testClass = new TestClass
             {
                 Id = 1,
                 EmployeeReference = "007",
@@ -40,7 +40,7 @@ namespace HREmployeeService.Tests
             };
 
             _payloadField = "Data";
-            _payloadData = JsonConvert.SerializeObject(_employee);
+            _payloadData = JsonConvert.SerializeObject(_testClass);
             _validPayLoad = new Dictionary<string, string> { { _payloadField, _payloadData } };
         }
 
@@ -152,13 +152,13 @@ namespace HREmployeeService.Tests
         {
             const int expectedEmployeeReferenceNumber = 1;
 
-            var jsonString = JsonConvert.SerializeObject(_employee);
+            var jsonString = JsonConvert.SerializeObject(_testClass);
             var content = new StringContent(jsonString);
             await _server.HttpClient.PostAsync("/employee/create", content);
 
             var response = await _server.HttpClient.GetAsync($"/employee/read/{expectedEmployeeReferenceNumber}");
             var responseBodyContent = await response.Content.ReadAsStringAsync();
-            var jsonResult = JsonConvert.DeserializeObject<Employee>(responseBodyContent);
+            var jsonResult = JsonConvert.DeserializeObject<TestClass>(responseBodyContent);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(responseBodyContent, Is.EqualTo("read"));
@@ -167,7 +167,7 @@ namespace HREmployeeService.Tests
         }
     }
 
-    internal class Employee
+    internal class TestClass
     {
         public int Id { get; set; }
         public string EmployeeReference { get; set; }

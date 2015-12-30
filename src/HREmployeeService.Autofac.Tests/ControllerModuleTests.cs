@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace HREmployeeService.Autofac.Tests
 {
-    public class PingControllerModuleTests
+    public class ControllerModuleTests
     {
         private IContainer _container;
 
@@ -24,6 +24,14 @@ namespace HREmployeeService.Autofac.Tests
             var result = _container.Resolve<PingController>();
 
             Assert.That(result, Is.InstanceOf<PingController>());
+        }
+
+        [Test]
+        public void resolves_EmployeeController()
+        {
+            var result = _container.Resolve<EmployeeController>();
+
+            Assert.That(result, Is.InstanceOf<EmployeeController>());
         }
     }
 }
