@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,6 +14,9 @@ namespace HREmployeeService.Tests
     {
         private TestServer _server;
         private Employee _employee;
+        private string _payloadField;
+        private string _payloadData;
+        private Dictionary<string, string> _validPayLoad;
 
         [SetUp]
         public void SetUp()
@@ -35,6 +38,10 @@ namespace HREmployeeService.Tests
                 HomePhone = "01737111111",
                 MobilePhone = "07845234233"
             };
+
+            _payloadField = "Data";
+            _payloadData = JsonConvert.SerializeObject(_employee);
+            _validPayLoad = new Dictionary<string, string> { { _payloadField, _payloadData } };
         }
 
         [Test]
@@ -46,78 +53,98 @@ namespace HREmployeeService.Tests
             Assert.That("pong", Is.EqualTo(result));
         }
 
-        [Test, Ignore("")]
+        [Test]
         public async Task ShouldReceiveEmployeeRecordOnCreate()
         {
-            var jsonString = JsonConvert.SerializeObject(_employee);
-            var content = new StringContent(jsonString);
-            var response = await _server.HttpClient.PostAsync("/employee/create", content);
+            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
+            {
+                Content = new FormUrlEncodedContent(_validPayLoad)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("Created"));
+            Assert.That(responseBodyContent, Is.EqualTo("created"));
         }
 
-        [Test, Ignore("")]
+        [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithBlankStringOnCreate()
         {
-            var response = await _server.HttpClient.PostAsync("/employee/create", new StringContent(string.Empty));
+            var inValidPayload = new Dictionary<string, string> { {string.Empty, string.Empty} };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
+            {
+                Content = new FormUrlEncodedContent(inValidPayload)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
             
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("Bad Request"));
+            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
         }
 
-        [Test, Ignore("")]
-        public async Task ShouldFailToReceiveEmployeeRecordWithEmptyObjectOnCreate()
+        [Test]
+        public async Task ShouldFailToReceiveEmployeeRecordWithNoContentsOnCreate()
         {
-            var response = await _server.HttpClient.PostAsync("/employee/create", null);
+            var inValidPayload = new Dictionary<string, string>();
+            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
+            {
+                Content = new FormUrlEncodedContent(inValidPayload)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("Bad Request"));
+            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
         }
 
-        [Test, Ignore("")]
+        [Test]
         public async Task ShouldReceiveEmployeeRecordOnUpdate()
         {
-            var jsonString = JsonConvert.SerializeObject(_employee);
-            var content = new StringContent(jsonString);
-            var response = await _server.HttpClient.PutAsync("/employee/update", content);
+            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            {
+                Content = new FormUrlEncodedContent(_validPayLoad)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("Updated"));
+            Assert.That(responseBodyContent, Is.EqualTo("updated"));
         }
 
-        [Test, Ignore("")]
+        [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithBlankStringOnUpdate()
         {
-            var response = await _server.HttpClient.PutAsync("/employee/update", new StringContent(string.Empty));
+            var inValidPayload = new Dictionary<string, string> { { string.Empty, string.Empty } };
+            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            {
+                Content = new FormUrlEncodedContent(inValidPayload)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("Bad Request"));
+            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
         }
 
-        [Test, Ignore("")]
-        public async Task ShouldFailToReceiveEmployeeRecordWithEmptyObjectOnUpdate()
+        [Test]
+        public async Task ShouldFailToReceiveEmployeeRecordWithEmptyContentOnUpdate()
         {
-            var response = await _server.HttpClient.PutAsync("/employee/update", new StreamContent(Stream.Null));
+            var inValidPayload = new Dictionary<string, string>();
+            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            {
+                Content = new FormUrlEncodedContent(inValidPayload)
+            };
+
+            var response = await _server.HttpClient.SendAsync(request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("Bad Request"));
-        }
-
-        [Test, Ignore("")]
-        public async Task ShouldFailToReceiveEmployeeRecordWithNullObjectOnUpdate()
-        {
-            var response = await _server.HttpClient.PutAsync("/employee/update", null);
-            var responseBodyContent = await response.Content.ReadAsStringAsync();
-
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("Bad Request"));
+            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
         }
 
         [Test, Ignore("")]
@@ -125,12 +152,16 @@ namespace HREmployeeService.Tests
         {
             const int expectedEmployeeReferenceNumber = 1;
 
-            var response = await _server.HttpClient.GetAsync("/employee/read");
+            var jsonString = JsonConvert.SerializeObject(_employee);
+            var content = new StringContent(jsonString);
+            await _server.HttpClient.PostAsync("/employee/create", content);
+
+            var response = await _server.HttpClient.GetAsync($"/employee/read/{expectedEmployeeReferenceNumber}");
             var responseBodyContent = await response.Content.ReadAsStringAsync();
             var jsonResult = JsonConvert.DeserializeObject<Employee>(responseBodyContent);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("Read"));
+            Assert.That(responseBodyContent, Is.EqualTo("read"));
             Assert.IsNotNull(jsonResult);
             Assert.That(jsonResult.EmployeeReference, Is.EqualTo(expectedEmployeeReferenceNumber));
         }

@@ -1,4 +1,4 @@
-﻿namespace HREmployeeService.Models
+﻿namespace HREmployeeService.Controllers.Models
 {
     public class Payload
     {

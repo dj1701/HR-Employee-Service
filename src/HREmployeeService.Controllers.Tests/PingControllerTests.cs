@@ -2,6 +2,7 @@
 
 namespace HREmployeeService.Controllers.Tests
 {
+    [TestFixture]
     public class PingControllerTests
     {
         [Test]
