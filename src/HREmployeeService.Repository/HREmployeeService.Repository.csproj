@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\MissingManatoryDataArgumentException.cs" />
+    <Compile Include="Exceptions\StorageAccessException.cs" />
     <Compile Include="Models\EmployeeData.cs" />
     <Compile Include="StorageService.cs" />
     <Compile Include="IStorageService.cs" />

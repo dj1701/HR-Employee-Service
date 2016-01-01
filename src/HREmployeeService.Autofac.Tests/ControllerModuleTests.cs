@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Autofac.Core;
 using HREmployeeService.Controllers;
 using NUnit.Framework;
 
@@ -15,7 +14,8 @@ namespace HREmployeeService.Autofac.Tests
             var builder = new ContainerBuilder();
 
             builder.RegisterModule(new ControllerModule());
-
+            builder.RegisterModule(new StorageServiceModule());
+            
             _container = builder.Build();
         }
 

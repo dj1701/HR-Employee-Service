@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using FakeItEasy;
 using HREmployeeService.Controllers.Models;
@@ -54,13 +55,13 @@ namespace HREmployeeService.Controllers.Tests
         }
 
         [Test]
-        public void ShouldReturnNullContentWithStatusOfNotFoundIfRecordIdIsNull()
+        public void ShouldOnReadReceiveMissingManatoryDataArgumentExceptionWhenIdIsNull()
         {
-            A.CallTo(() => _storageService.Read(null)).Returns(null);
-           
+            A.CallTo(() => _storageService.Read(null)).Throws(new MissingManatoryDataArgumentException("id is null"));
+
             Assert.That(async () => await _unitUnderTest.Get(null),
-                Throws.TypeOf<MissingManatoryDataArgumentException>()
-                    .With.Message.EqualTo("id is null"));
+               Throws.TypeOf<MissingManatoryDataArgumentException>()
+                   .With.Message.EqualTo("id is null"));
         }
 
         [Test]

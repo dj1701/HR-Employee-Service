@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using HREmployeeService.Repository.Exceptions;
 using HREmployeeService.Repository.Models;
 using MongoDB.Bson;
@@ -36,7 +35,7 @@ namespace HREmployeeService.Repository
             }
             catch (MongoException)
             {
-                throw new Exception("Error creating Mongo document");
+                throw new StorageAccessException("Error creating Mongo document");
             }
         }
 
@@ -57,17 +56,16 @@ namespace HREmployeeService.Repository
             }
             catch (MongoException)
             {
-                throw new Exception("Error updating Mongo document");
+                throw new StorageAccessException("Error updating Mongo document");
             }
         }
 
         public async Task<object> Read(string id)
         {
-            EmployeeData result = null;
+            EmployeeData result;
 
             if (id == null)
             {
-                //log error here
                 throw new MissingManatoryDataArgumentException("id is null");
             }
 
@@ -78,10 +76,10 @@ namespace HREmployeeService.Repository
             }
             catch (MongoException)
             {
-               throw new Exception("Error reading Mongo document");
+               throw new StorageAccessException("Error reading Mongo document");
             }
 
-            return result?.Payload;
+            return result.Payload;
         }
     }
 }
