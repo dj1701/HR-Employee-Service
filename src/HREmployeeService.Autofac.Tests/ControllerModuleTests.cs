@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Core;
 using HREmployeeService.Controllers;
 using NUnit.Framework;
 

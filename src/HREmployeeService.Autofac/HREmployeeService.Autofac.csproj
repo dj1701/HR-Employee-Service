@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="ControllerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StorageServiceModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -66,6 +67,10 @@
     <ProjectReference Include="..\HREmployeeService.Controllers\HREmployeeService.Controllers.csproj">
       <Project>{3242ca3f-74d4-4051-954f-06f816651a80}</Project>
       <Name>HREmployeeService.Controllers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HREmployeeService.Repository\HREmployeeService.Repository.csproj">
+      <Project>{baaddde1-becd-4c80-8574-35267a57c776}</Project>
+      <Name>HREmployeeService.Repository</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

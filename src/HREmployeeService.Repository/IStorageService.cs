@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using System.Web.Http;
 
-namespace StorageService
+namespace HREmployeeService.Repository
 {
     public interface IStorageService
     {

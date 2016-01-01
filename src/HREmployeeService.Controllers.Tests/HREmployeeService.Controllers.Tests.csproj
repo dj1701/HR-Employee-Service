@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FakeItEasy, Version=1.25.3.0, Culture=neutral, PublicKeyToken=eff28e2146d5fd2c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FakeItEasy.1.25.3\lib\net40\FakeItEasy.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -67,6 +71,10 @@
     <ProjectReference Include="..\HREmployeeService.Controllers\HREmployeeService.Controllers.csproj">
       <Project>{3242ca3f-74d4-4051-954f-06f816651a80}</Project>
       <Name>HREmployeeService.Controllers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HREmployeeService.Repository\HREmployeeService.Repository.csproj">
+      <Project>{baaddde1-becd-4c80-8574-35267a57c776}</Project>
+      <Name>HREmployeeService.Repository</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

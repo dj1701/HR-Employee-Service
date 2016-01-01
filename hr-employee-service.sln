@@ -7,10 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService", "src\HREmployeeService\HREmployeeService.csproj", "{086EF300-08B6-49B3-87DE-1F8763BB9710}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorageService", "src\StorageService\StorageService.csproj", "{BAADDDE1-BECD-4C80-8574-35267A57C776}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorageService.Tests", "src\StorageService.Tests\StorageService.Tests.csproj", "{A2B4758A-0E8D-4853-9664-14B5D5715EDA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Controllers", "src\HREmployeeService.Controllers\HREmployeeService.Controllers.csproj", "{3242CA3F-74D4-4051-954F-06F816651A80}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Controllers.Tests", "src\HREmployeeService.Controllers.Tests\HREmployeeService.Controllers.Tests.csproj", "{1A460BF1-4F41-43B7-BB5C-C1B2DD14952C}"
@@ -18,6 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Autofac", "src\HREmployeeService.Autofac\HREmployeeService.Autofac.csproj", "{A7996248-1C1E-454F-BAD2-67AD0C4F0745}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Autofac.Tests", "src\HREmployeeService.Autofac.Tests\HREmployeeService.Autofac.Tests.csproj", "{7CCA51AC-8969-4234-90D1-BE659FD0BB99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Repository", "src\HREmployeeService.Repository\HREmployeeService.Repository.csproj", "{BAADDDE1-BECD-4C80-8574-35267A57C776}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HREmployeeService.Repository.Tests", "src\HREmployeeService.Repository.Tests\HREmployeeService.Repository.Tests.csproj", "{A2B4758A-0E8D-4853-9664-14B5D5715EDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,14 +33,6 @@ Global
 		{086EF300-08B6-49B3-87DE-1F8763BB9710}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{086EF300-08B6-49B3-87DE-1F8763BB9710}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{086EF300-08B6-49B3-87DE-1F8763BB9710}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3242CA3F-74D4-4051-954F-06F816651A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3242CA3F-74D4-4051-954F-06F816651A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3242CA3F-74D4-4051-954F-06F816651A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +49,14 @@ Global
 		{7CCA51AC-8969-4234-90D1-BE659FD0BB99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CCA51AC-8969-4234-90D1-BE659FD0BB99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CCA51AC-8969-4234-90D1-BE659FD0BB99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAADDDE1-BECD-4C80-8574-35267A57C776}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B4758A-0E8D-4853-9664-14B5D5715EDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

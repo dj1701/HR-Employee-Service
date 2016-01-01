@@ -1,7 +1,6 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace StorageService.Models
+namespace HREmployeeService.Repository.Models
 {
     public class EmployeeData
     {

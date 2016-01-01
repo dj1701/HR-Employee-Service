@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HREmployeeService.Repository.Exceptions;
+using HREmployeeService.Repository.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using StorageService.Models;
 
-namespace StorageService
+namespace HREmployeeService.Repository
 {
     public class StorageService : IStorageService
     {
@@ -23,8 +24,7 @@ namespace StorageService
         {
             if (payload == null)
             {
-                //log error here
-                return null;
+                throw new MissingManatoryDataArgumentException("Payload is null");
             }
 
             try
@@ -44,8 +44,7 @@ namespace StorageService
         {
             if (id == null || payload == null)
             {
-                //log error here
-                return null;
+                throw new MissingManatoryDataArgumentException("Supplied arguments is null");
             }
 
             try
@@ -65,6 +64,12 @@ namespace StorageService
         public async Task<object> Read(string id)
         {
             EmployeeData result = null;
+
+            if (id == null)
+            {
+                //log error here
+                throw new MissingManatoryDataArgumentException("id is null");
+            }
 
             try
             {
