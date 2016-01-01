@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -11,14 +10,13 @@ namespace StorageService
     {
         private const string ConnectionString = "mongodb://localhost";
         private const string DbName = "hr-employee";
-        private readonly IMongoDatabase _db;
         private readonly IMongoCollection<EmployeeData> _collection;
 
         public StorageService()
         {
             var client = new MongoClient(ConnectionString);
-            _db = client.GetDatabase(DbName);
-            _collection = _db.GetCollection<EmployeeData>("employees");
+            var db = client.GetDatabase(DbName);
+            _collection = db.GetCollection<EmployeeData>("employees");
         }
 
         public async Task<string> Create(object payload)
@@ -42,15 +40,41 @@ namespace StorageService
             }
         }
 
-        public bool Update(object value)
+        public async Task<bool?> Update(string id, object payload)
         {
-            throw new System.NotImplementedException();
+            if (id == null || payload == null)
+            {
+                //log error here
+                return null;
+            }
+
+            try
+            {
+                var employeeData = await _collection.FindOneAndUpdateAsync(
+                e => e.Id == id,
+                Builders<EmployeeData>.Update.Set(e => e.Payload, payload));
+
+                return employeeData.Id == id;
+            }
+            catch (MongoException)
+            {
+                throw new Exception("Error updating Mongo document");
+            }
         }
 
-        public async Task<object> Read(string referenceNumber)
+        public async Task<object> Read(string id)
         {
-            var filter = Builders<EmployeeData>.Filter.Eq("EmployeeReference", referenceNumber);
-            var result = await _collection.Find(filter).FirstOrDefaultAsync();
+            EmployeeData result = null;
+
+            try
+            {
+                var filter = Builders<EmployeeData>.Filter.Eq("_id", id);
+                result = await _collection.Find(filter).FirstOrDefaultAsync();
+            }
+            catch (MongoException)
+            {
+               throw new Exception("Error reading Mongo document");
+            }
 
             return result?.Payload;
         }

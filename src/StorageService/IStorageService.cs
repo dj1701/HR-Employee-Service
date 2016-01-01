@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace StorageService
 {
     public interface IStorageService
     {
         Task<string> Create(object payload);
-        bool Update(object value);
-        Task<object> Read(string referenceNumber);
+        Task<bool?> Update(string id, object payload);
+        Task<object> Read(string id);
     }
 }

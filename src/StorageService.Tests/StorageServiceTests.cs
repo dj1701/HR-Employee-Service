@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace StorageService.Tests
@@ -10,11 +12,13 @@ namespace StorageService.Tests
     {
         private IStorageService _unitUnderTest;
         private TestPayload _testPayload;
+        private string _expectedEmployeeReference;
 
         [SetUp]
         public void SetUpBeforeEachTest()
         {
             _unitUnderTest = new StorageService();
+            _expectedEmployeeReference = "abc";
 
             var testClass = new TestClass
             {
@@ -40,22 +44,75 @@ namespace StorageService.Tests
         [Test]
         public async Task ShouldCreateEmployeeDataRecordWithId()
         {
-            var result = await _unitUnderTest.Create(_testPayload.Data);
+            ObjectId result;
+            var resultId = await _unitUnderTest.Create(_testPayload.Data);
 
-            Assert.IsNotNull(result);
-            Assert.That(result, Is.InstanceOf<string>());
+            Assert.IsNotNull(resultId);
+            Assert.That(ObjectId.TryParse(resultId, out result), Is.True);
         }
 
-        [Test, Ignore("")]
-        public async Task ShouldReadEmployeeDataByReferenceNumber()
+        [Test]
+        public async Task ShouldReturnNullWhenEmployeeDataRecordIsNull()
         {
-            const string expectedEmployeeReference = "abc";
-   
-            await _unitUnderTest.Create(_testPayload.Data);
-            var response = await _unitUnderTest.Read(expectedEmployeeReference);
+            var resultId = await _unitUnderTest.Create(null);
+
+            Assert.IsNull(resultId);
+        }
+
+        [Test]
+        public async Task ShouldReadEmployeeDataByIdWithEmployeeReferenceNumber()
+        {
+            var id = await _unitUnderTest.Create(_testPayload.Data);
+            var response = await _unitUnderTest.Read(id);
             Assert.IsNotNull(response);
 
-            //var result = JsonConvert.DeserializeObject(response.ToString());
+            var result = JObject.Parse(response.ToString());
+            var actualEmployeeReference = (string)result.SelectToken("EmployeeReference");
+
+            Assert.That(actualEmployeeReference, Is.EqualTo(_expectedEmployeeReference));
+        }
+
+        [Test]
+        public async Task ShouldReturnNullWhenReadIdIsNull()
+        {
+            var response = await _unitUnderTest.Read(null);
+
+            Assert.IsNull(response);
+        }
+
+        [Test]
+        public async Task ShouldUpdateEmployeeDataHomeNumberById()
+        {
+            var id = await _unitUnderTest.Create(_testPayload.Data);
+            var response = await _unitUnderTest.Read(id);
+            Assert.IsNotNull(response);
+
+            var result = JObject.Parse(response.ToString());
+            const string expectedHomeNumber = "0123456789";
+            result["HomePhone"] = expectedHomeNumber;
+
+            var updatedEmployeeData = result.ToString(Formatting.None);
+            var payload = new TestPayload{ Data = updatedEmployeeData};
+            var updated = await _unitUnderTest.Update(id, payload);
+
+            Assert.That(updated, Is.EqualTo(true));
+        }
+
+        [Test]
+        public async Task ShouldReturnNullWhenUpdateIdIsNull()
+        {
+            var id = await _unitUnderTest.Create(_testPayload.Data);
+            var response = await _unitUnderTest.Update(id, null);
+
+            Assert.IsNull(response);
+        }
+
+        [Test]
+        public async Task ShouldReturnNullWhenUpdatePayloadIsNull()
+        {
+            var response = await _unitUnderTest.Update(null, _testPayload.Data);
+
+            Assert.IsNull(response);
         }
     }
 
