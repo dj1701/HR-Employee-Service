@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Results;
 using HREmployeeService.Controllers.Models;
 using HREmployeeService.Repository;
 
@@ -27,8 +29,8 @@ namespace HREmployeeService.Controllers
         }
 
         [HttpPost]
-        [Route("employee/create")]
-        public HttpResponseMessage Post([FromBody] Payload value)
+        [Route("employee/{version}")]
+        public async Task<HttpResponseMessage> Post(string version, [FromBody] Payload value)
         {
             if (value?.Data == null)
             {
@@ -39,9 +41,13 @@ namespace HREmployeeService.Controllers
                 };
             }
 
-            //Write to mongo
+            var id = await _storageService.Create(value.Data);
 
-            return new HttpResponseMessage { Content = new StringContent("created") };
+            return new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.Created,
+                Content = new StringContent($"http://localhost:9000/employee/{version}/{id}")
+            };
         }
 
         [HttpPut]

@@ -44,7 +44,7 @@ namespace HREmployeeService.Controllers.Tests
         }
 
         [Test]
-        public async Task ShouldReturnResponseFromGetWithPayload()
+        public async Task ShouldOnReadReturnResponseWithPayload()
         {
             const string id = "1";
 
@@ -65,13 +65,26 @@ namespace HREmployeeService.Controllers.Tests
         }
 
         [Test]
-        public void ShouldReturnResponseFromPostWithCreatedMessage()
+        public async Task ShouldOnCreateReturnResponseWithUrl()
         {
-            var payload = new Payload {Data = new object()};
+            var payload = new Payload {Data = _expectedPayloadData};
 
-            var result = _unitUnderTest.Post(payload);
+            const string version = "1.0";
+            const string fakeId = "123456789";
+            A.CallTo(() => _storageService.Create(payload.Data)).Returns(fakeId);
+            var result = await _unitUnderTest.Post(version, payload);
+            
+            var expectedUrl = $"http://localhost:9000/employee/{version}/{fakeId}";
+            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo(expectedUrl));
+        }
 
-            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo("created"));
+        [Test]
+        public async Task ShouldOnUpdateReceiveBadRequestWhenEitherVersionOrPayloadIsNull()
+        {
+            var result = await _unitUnderTest.Post(null, null);
+
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo("bad request"));
         }
 
         [Test]

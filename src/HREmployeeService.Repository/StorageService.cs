@@ -23,7 +23,7 @@ namespace HREmployeeService.Repository
         {
             if (payload == null)
             {
-                throw new MissingManatoryDataArgumentException("Payload is null");
+                throw new MissingManatoryDataArgumentException("Create - Payload is null");
             }
 
             try
@@ -43,7 +43,7 @@ namespace HREmployeeService.Repository
         {
             if (id == null || payload == null)
             {
-                throw new MissingManatoryDataArgumentException("Supplied arguments is null");
+                throw new MissingManatoryDataArgumentException("Update - Supplied arguments is null");
             }
 
             try
@@ -66,7 +66,7 @@ namespace HREmployeeService.Repository
 
             if (id == null)
             {
-                throw new MissingManatoryDataArgumentException("id is null");
+                throw new MissingManatoryDataArgumentException("Read - id is null");
             }
 
             try
