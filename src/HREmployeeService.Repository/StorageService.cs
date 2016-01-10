@@ -19,17 +19,17 @@ namespace HREmployeeService.Repository
             _collection = db.GetCollection<EmployeeData>("employees");
         }
 
-        public async Task<string> Create(object payload)
+        public async Task<string> Create(string version, object payload)
         {
-            if (payload == null)
+            if (version == null || payload == null)
             {
-                throw new MissingManatoryDataArgumentException("Create - Payload is null");
+                throw new MissingManatoryDataArgumentException("Create - Supplied arguments is null");
             }
 
             try
             {
                 var id = ObjectId.GenerateNewId().ToString();
-                await _collection.InsertOneAsync(new EmployeeData { Id = id, Payload = payload });
+                await _collection.InsertOneAsync(new EmployeeData { Id = id, Version = version, Payload = payload });
 
                 return id;
             }
@@ -39,7 +39,7 @@ namespace HREmployeeService.Repository
             }
         }
 
-        public async Task<bool?> Update(string id, object payload)
+        public async Task<bool> Update(string version, string id, object payload)
         {
             if (id == null || payload == null)
             {
@@ -50,9 +50,9 @@ namespace HREmployeeService.Repository
             {
                 var employeeData = await _collection.FindOneAndUpdateAsync(
                 e => e.Id == id,
-                Builders<EmployeeData>.Update.Set(e => e.Payload, payload));
+                Builders<EmployeeData>.Update.Set(e => e.Payload, payload).Set(e => e.Version, version));
 
-                return employeeData.Id == id;
+                return employeeData?.Id == id;
             }
             catch (MongoException)
             {
@@ -60,18 +60,19 @@ namespace HREmployeeService.Repository
             }
         }
 
-        public async Task<object> Read(string id)
+        public async Task<object> Read(string version, string id)
         {
             EmployeeData result;
 
-            if (id == null)
+            if (id == null || version == null)
             {
-                throw new MissingManatoryDataArgumentException("Read - id is null");
+                throw new MissingManatoryDataArgumentException("Read - Supplied arguments is null");
             }
 
             try
             {
-                var filter = Builders<EmployeeData>.Filter.Eq("_id", id);
+                var builder = Builders<EmployeeData>.Filter;
+                var filter = builder.Eq("_id", id) & builder.Eq("Version", version);
                 result = await _collection.Find(filter).FirstOrDefaultAsync();
             }
             catch (MongoException)

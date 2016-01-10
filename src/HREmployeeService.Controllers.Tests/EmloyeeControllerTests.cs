@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
+using System.Web.Http.Results;
 using FakeItEasy;
 using HREmployeeService.Controllers.Models;
 using HREmployeeService.Repository;
-using HREmployeeService.Repository.Exceptions;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -17,6 +16,9 @@ namespace HREmployeeService.Controllers.Tests
         private IStorageService _storageService;
         private TestClass _testClass;
         private string _expectedPayloadData;
+        private string _expectedCreatedId;
+        private Payload _payload;
+        private string _version;
 
         [SetUp]
         public void SetUpBeforeEachTest()
@@ -41,6 +43,33 @@ namespace HREmployeeService.Controllers.Tests
             };
 
             _expectedPayloadData = JsonConvert.SerializeObject(_testClass);
+
+            _payload = new Payload {Data = _expectedPayloadData};
+            _expectedCreatedId = "123456789";
+            _version = "1.0";
+            A.CallTo(() => _storageService.Create(_version, _payload.Data)).Returns(_expectedCreatedId);
+        }
+
+        [Test]
+        public async Task ShouldOnCreateReturnResponseWithUrl()
+        {
+            var expectedUrl = $"http://localhost:9000/employee/{_version}/{_expectedCreatedId}";
+            var result = await _unitUnderTest.Post(_version, _payload);
+
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<CreatedNegotiatedContentResult<string>>());
+            Assert.That(((CreatedNegotiatedContentResult<string>)result).Content, Is.EqualTo(_expectedCreatedId));
+            Assert.That(((CreatedNegotiatedContentResult<string>)result).Location.AbsoluteUri, Is.EqualTo(expectedUrl));
+        }
+
+        [Test]
+        public async Task ShouldOnCreateReceiveBadRequestResponseWhenEitherVersionOrPayloadArgumentsIsNull()
+        {
+            var result = await _unitUnderTest.Post(null, null);
+
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<BadRequestErrorMessageResult>());
+            Assert.That(((BadRequestErrorMessageResult)result).Message, Is.EqualTo("bad request"));
         }
 
         [Test]
@@ -48,56 +77,56 @@ namespace HREmployeeService.Controllers.Tests
         {
             const string id = "1";
 
-            A.CallTo(() => _storageService.Read(id)).Returns(_expectedPayloadData);
-            var result = await _unitUnderTest.Get(id);
-            
-            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo(_expectedPayloadData));
+            A.CallTo(() => _storageService.Read(_version, id)).Returns(_expectedPayloadData);
+            var result = await _unitUnderTest.Get(_version, id);
+
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<OkNegotiatedContentResult<object>>());
+            Assert.That(((OkNegotiatedContentResult<object>)result).Content, Is.EqualTo(_expectedPayloadData));
         }
 
         [Test]
-        public void ShouldOnReadReceiveMissingManatoryDataArgumentExceptionWhenIdIsNull()
+        public async Task ShouldOnReadReceiveBadRequestWhenIdIsNull()
         {
-            A.CallTo(() => _storageService.Read(null)).Throws(new MissingManatoryDataArgumentException("id is null"));
+            var result = await _unitUnderTest.Get(null, null);
 
-            Assert.That(async () => await _unitUnderTest.Get(null),
-               Throws.TypeOf<MissingManatoryDataArgumentException>()
-                   .With.Message.EqualTo("id is null"));
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<BadRequestErrorMessageResult>());
+            Assert.That(((BadRequestErrorMessageResult)result).Message, Is.EqualTo("bad request"));
         }
 
         [Test]
-        public async Task ShouldOnCreateReturnResponseWithUrl()
+        public async Task ShouldOnUpdateReceiveOkStatusCodeResponseFromPutWhenSuccessfullyUpdated()
         {
-            var payload = new Payload {Data = _expectedPayloadData};
+            A.CallTo(() => _storageService.Update(_version, _expectedCreatedId, _payload)).Returns(true);
+            var result = await _unitUnderTest.Put(_version, _expectedCreatedId, _payload);
 
-            const string version = "1.0";
-            const string fakeId = "123456789";
-            A.CallTo(() => _storageService.Create(payload.Data)).Returns(fakeId);
-            var result = await _unitUnderTest.Post(version, payload);
-            
-            var expectedUrl = $"http://localhost:9000/employee/{version}/{fakeId}";
-            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo(expectedUrl));
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<OkResult>());
         }
 
         [Test]
-        public async Task ShouldOnUpdateReceiveBadRequestWhenEitherVersionOrPayloadIsNull()
+        public async Task ShouldOnUpdateReceiveBadRequestIfUpdateFailsWithIncorrectId()
         {
-            var result = await _unitUnderTest.Post(null, null);
+            const string noExistentId = "1234";
+            var result = await _unitUnderTest.Put(_version, noExistentId, _payload);
 
-            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo("bad request"));
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<BadRequestErrorMessageResult>());
+            Assert.That(((BadRequestErrorMessageResult)result).Message, Is.EqualTo("update failed"));
         }
 
         [Test]
-        public void ShouldReturnResponseFromPutWithUpdatedMessage()
+        public async Task ShouldOnUpdateReceiveBadRequestWhenEitherArgumentsIsNull()
         {
-            var payload = new Payload { Data = new object() };
+            var result = await _unitUnderTest.Put(null, null, null);
 
-            var result = _unitUnderTest.Put(payload);
-
-            Assert.That(result.Content.ReadAsStringAsync().Result, Is.EqualTo("updated"));
+            Assert.IsNotNull(result);
+            Assert.That(result, Is.InstanceOf<BadRequestErrorMessageResult>());
+            Assert.That(((BadRequestErrorMessageResult)result).Message, Is.EqualTo("bad request"));
         }
     }
-
+    
     internal class TestClass
     {
         public int Id { get; set; }

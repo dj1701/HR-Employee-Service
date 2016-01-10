@@ -17,6 +17,8 @@ namespace HREmployeeService.Tests
         private string _payloadField;
         private string _payloadData;
         private Dictionary<string, string> _validPayLoad;
+        private string _version;
+        private HttpRequestMessage _request;
 
         [SetUp]
         public void SetUp()
@@ -39,9 +41,15 @@ namespace HREmployeeService.Tests
                 MobilePhone = "07845234233"
             };
 
+            _version = "1.0";
             _payloadField = "Data";
             _payloadData = JsonConvert.SerializeObject(_testClass);
             _validPayLoad = new Dictionary<string, string> { { _payloadField, _payloadData } };
+
+            _request = new HttpRequestMessage(HttpMethod.Post, $"/employee/{_version}")
+            {
+                Content = new FormUrlEncodedContent(_validPayLoad)
+            };
         }
 
         [Test]
@@ -56,70 +64,61 @@ namespace HREmployeeService.Tests
         [Test]
         public async Task ShouldReceiveEmployeeRecordOnCreate()
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
-            {
-                Content = new FormUrlEncodedContent(_validPayLoad)
-            };
-
-            var response = await _server.HttpClient.SendAsync(request);
-            var responseBodyContent = await response.Content.ReadAsStringAsync();
-
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("created"));
+            var response = await _server.HttpClient.SendAsync(_request);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
         }
 
         [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithBlankStringOnCreate()
         {
             var inValidPayload = new Dictionary<string, string> { {string.Empty, string.Empty} };
-            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
-            {
-                Content = new FormUrlEncodedContent(inValidPayload)
-            };
+            _request.Content = new FormUrlEncodedContent(inValidPayload);
 
-            var response = await _server.HttpClient.SendAsync(request);
+            var response = await _server.HttpClient.SendAsync(_request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
             
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
+            Assert.That(responseBodyContent, Is.EqualTo("{\"Message\":\"bad request\"}"));
         }
 
         [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithNoContentsOnCreate()
         {
             var inValidPayload = new Dictionary<string, string>();
-            var request = new HttpRequestMessage(HttpMethod.Post, "/employee/create")
-            {
-                Content = new FormUrlEncodedContent(inValidPayload)
-            };
+            _request.Content = new FormUrlEncodedContent(inValidPayload);
 
-            var response = await _server.HttpClient.SendAsync(request);
+            var response = await _server.HttpClient.SendAsync(_request);
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
+            Assert.That(responseBodyContent, Is.EqualTo("{\"Message\":\"bad request\"}"));
         }
 
         [Test]
         public async Task ShouldReceiveEmployeeRecordOnUpdate()
         {
-            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            var resultFromCreate = await _server.HttpClient.SendAsync(_request);
+            Assert.NotNull(resultFromCreate);
+
+            var url = resultFromCreate.Headers.Location;
+            var request = new HttpRequestMessage(HttpMethod.Put, url)
             {
                 Content = new FormUrlEncodedContent(_validPayLoad)
             };
 
-            var response = await _server.HttpClient.SendAsync(request);
-            var responseBodyContent = await response.Content.ReadAsStringAsync();
-
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("updated"));
+            var resultFromUpdate = await _server.HttpClient.SendAsync(request);
+            Assert.That(resultFromUpdate.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithBlankStringOnUpdate()
         {
+            var resultFromCreate = await _server.HttpClient.SendAsync(_request);
+            Assert.NotNull(resultFromCreate);
+
+            var url = resultFromCreate.Headers.Location;
             var inValidPayload = new Dictionary<string, string> { { string.Empty, string.Empty } };
-            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            var request = new HttpRequestMessage(HttpMethod.Put, url)
             {
                 Content = new FormUrlEncodedContent(inValidPayload)
             };
@@ -128,14 +127,19 @@ namespace HREmployeeService.Tests
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
+            Assert.That(responseBodyContent, Is.EqualTo("{\"Message\":\"bad request\"}"));
         }
 
         [Test]
         public async Task ShouldFailToReceiveEmployeeRecordWithEmptyContentOnUpdate()
         {
+            var resultFromCreate = await _server.HttpClient.SendAsync(_request);
+            Assert.NotNull(resultFromCreate);
+
+            var url = resultFromCreate.Headers.Location;
+            
             var inValidPayload = new Dictionary<string, string>();
-            var request = new HttpRequestMessage(HttpMethod.Put, "/employee/update")
+            var request = new HttpRequestMessage(HttpMethod.Put, url)
             {
                 Content = new FormUrlEncodedContent(inValidPayload)
             };
@@ -144,26 +148,28 @@ namespace HREmployeeService.Tests
             var responseBodyContent = await response.Content.ReadAsStringAsync();
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            Assert.That(responseBodyContent, Is.EqualTo("bad request"));
+            Assert.That(responseBodyContent, Is.EqualTo("{\"Message\":\"bad request\"}"));
         }
 
         [Test, Ignore("")]
         public async Task ShouldReceiveEmployeeRecordOnRead()
         {
-            const int expectedEmployeeReferenceNumber = 1;
+            var requestToCreate = new HttpRequestMessage(HttpMethod.Post, $"/employee/{_version}")
+            {
+                Content = new FormUrlEncodedContent(_validPayLoad)
+            };
 
-            var jsonString = JsonConvert.SerializeObject(_testClass);
-            var content = new StringContent(jsonString);
-            await _server.HttpClient.PostAsync("/employee/create", content);
+            var result = await _server.HttpClient.SendAsync(requestToCreate);
 
-            var response = await _server.HttpClient.GetAsync($"/employee/read/{expectedEmployeeReferenceNumber}");
+            var id = result.Content.ReadAsStringAsync().Result;
+
+            var response = await _server.HttpClient.GetAsync($"/employee/{_version}/{id}");
             var responseBodyContent = await response.Content.ReadAsStringAsync();
             var jsonResult = JsonConvert.DeserializeObject<TestClass>(responseBodyContent);
-
+            
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseBodyContent, Is.EqualTo("read"));
             Assert.IsNotNull(jsonResult);
-            Assert.That(jsonResult.EmployeeReference, Is.EqualTo(expectedEmployeeReferenceNumber));
+            Assert.That(jsonResult.EmployeeReference, Is.EqualTo(_testClass.EmployeeReference));
         }
     }
 

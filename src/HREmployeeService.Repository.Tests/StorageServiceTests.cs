@@ -14,6 +14,7 @@ namespace HREmployeeService.Repository.Tests
         private IStorageService _unitUnderTest;
         private TestPayload _testPayload;
         private string _expectedEmployeeReference;
+        private string _version;
 
         [SetUp]
         public void SetUpBeforeEachTest()
@@ -39,6 +40,7 @@ namespace HREmployeeService.Repository.Tests
 
             var jsonString = JsonConvert.SerializeObject(testClass);
 
+            _version = "1.0";
             _testPayload = new TestPayload {Data = jsonString};
         }
 
@@ -46,7 +48,7 @@ namespace HREmployeeService.Repository.Tests
         public async Task ShouldCreateEmployeeDataRecordWithId()
         {
             ObjectId result;
-            var resultId = await _unitUnderTest.Create(_testPayload.Data);
+            var resultId = await _unitUnderTest.Create(_version, _testPayload.Data);
 
             Assert.IsNotNull(resultId);
             Assert.That(ObjectId.TryParse(resultId, out result), Is.True);
@@ -55,16 +57,16 @@ namespace HREmployeeService.Repository.Tests
         [Test]
         public void ShouldRaiseMissingManatoryDataArgumentExceptionWhenIdIsNullOnCreate()
         {
-            Assert.That(async () => await _unitUnderTest.Create(null),
+            Assert.That(async () => await _unitUnderTest.Create(null, null),
                 Throws.TypeOf<MissingManatoryDataArgumentException>()
-                    .With.Message.EqualTo("Create - Payload is null"));
+                    .With.Message.EqualTo("Create - Supplied arguments is null"));
         }
 
         [Test]
-        public async Task ShouldOnReadEmployeeDataByIdWithEmployeeReferenceNumber()
+        public async Task ShouldOnReadEmployeeDataByIdAndVersion()
         {
-            var id = await _unitUnderTest.Create(_testPayload.Data);
-            var response = await _unitUnderTest.Read(id);
+            var id = await _unitUnderTest.Create(_version, _testPayload.Data);
+            var response = await _unitUnderTest.Read(_version, id);
             Assert.IsNotNull(response);
 
             var result = JObject.Parse(response.ToString());
@@ -76,15 +78,15 @@ namespace HREmployeeService.Repository.Tests
         [Test]
         public void ShouldOnReadRaiseMissingManatoryDataArgumentExceptionWhenIdIsNull()
         {
-            Assert.That(async () => await _unitUnderTest.Read(null),
+            Assert.That(async () => await _unitUnderTest.Read(null, null),
                 Throws.TypeOf<MissingManatoryDataArgumentException>()
-                    .With.Message.EqualTo("Read - id is null"));
+                    .With.Message.EqualTo("Read - Supplied arguments is null"));
         }
         [Test]
-        public async Task ShouldOnUpdateEmployeeDataHomeNumberById()
+        public async Task ShouldOnUpdateEmployeeDataHomeNumberByIdAndVersion()
         {
-            var id = await _unitUnderTest.Create(_testPayload.Data);
-            var response = await _unitUnderTest.Read(id);
+            var id = await _unitUnderTest.Create(_version, _testPayload.Data);
+            var response = await _unitUnderTest.Read(_version, id);
             Assert.IsNotNull(response);
 
             var result = JObject.Parse(response.ToString());
@@ -93,15 +95,25 @@ namespace HREmployeeService.Repository.Tests
 
             var updatedEmployeeData = result.ToString(Formatting.None);
             var payload = new TestPayload{ Data = updatedEmployeeData};
-            var updated = await _unitUnderTest.Update(id, payload);
+            var updated = await _unitUnderTest.Update(_version, id, payload.Data);
 
             Assert.That(updated, Is.EqualTo(true));
         }
 
         [Test]
+        public async Task ShouldOnUpdateReturnFalseIfWrongIdIsGiven()
+        {
+            var payload = new TestPayload { Data = _testPayload };
+            const string id = "1234";
+            var result = await _unitUnderTest.Update(_version, id, payload.Data);
+
+            Assert.That(result, Is.EqualTo(false));
+        }
+
+        [Test]
         public void ShouldOnUpdateRaiseMissingManatoryDataArgumentExceptionWhenIdIsNull()
         {
-            Assert.That(async () => await _unitUnderTest.Update(null, null),
+            Assert.That(async () => await _unitUnderTest.Update(null, null, null),
                 Throws.TypeOf<MissingManatoryDataArgumentException>()
                     .With.Message.EqualTo("Update - Supplied arguments is null"));
         }
