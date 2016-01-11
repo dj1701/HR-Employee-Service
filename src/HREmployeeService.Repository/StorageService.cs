@@ -49,7 +49,7 @@ namespace HREmployeeService.Repository
             try
             {
                 var employeeData = await _collection.FindOneAndUpdateAsync(
-                e => e.Id == id,
+                e => e.Id == id && e.Version == version,
                 Builders<EmployeeData>.Update.Set(e => e.Payload, payload).Set(e => e.Version, version));
 
                 return employeeData?.Id == id;

@@ -101,11 +101,23 @@ namespace HREmployeeService.Repository.Tests
         }
 
         [Test]
-        public async Task ShouldOnUpdateReturnFalseIfWrongIdIsGiven()
+        public async Task ShouldOnUpdateReturnFalseIfInvalidIdIsGiven()
         {
             var payload = new TestPayload { Data = _testPayload };
-            const string id = "1234";
-            var result = await _unitUnderTest.Update(_version, id, payload.Data);
+            const string invalidId = "1234";
+            var result = await _unitUnderTest.Update(_version, invalidId, payload.Data);
+
+            Assert.That(result, Is.EqualTo(false));
+        }
+
+        [Test]
+        public async Task ShouldOnUpdateReturnFalseIfInvalidVersionIsGiven()
+        {
+            var payload = new TestPayload { Data = _testPayload };
+            const string invalidVersion = "1234";
+
+            var id = await _unitUnderTest.Create(_version, _testPayload.Data);
+            var result = await _unitUnderTest.Update(invalidVersion, id, payload.Data);
 
             Assert.That(result, Is.EqualTo(false));
         }
