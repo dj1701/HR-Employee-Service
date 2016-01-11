@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Owin.Testing;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace HREmployeeService.Tests
@@ -151,25 +152,21 @@ namespace HREmployeeService.Tests
             Assert.That(responseBodyContent, Is.EqualTo("{\"Message\":\"bad request\"}"));
         }
 
-        [Test, Ignore("")]
+        [Test]
         public async Task ShouldReceiveEmployeeRecordOnRead()
         {
-            var requestToCreate = new HttpRequestMessage(HttpMethod.Post, $"/employee/{_version}")
-            {
-                Content = new FormUrlEncodedContent(_validPayLoad)
-            };
+            var resultFromCreate = await _server.HttpClient.SendAsync(_request);
+            Assert.NotNull(resultFromCreate);
 
-            var result = await _server.HttpClient.SendAsync(requestToCreate);
+            var url = resultFromCreate.Headers.Location.AbsoluteUri;
+            var response = await _server.HttpClient.GetAsync(url);
 
-            var id = result.Content.ReadAsStringAsync().Result;
+            var responseBodyContent = response.Content.ReadAsStringAsync().Result;
+            var resultJson = JToken.Parse(responseBodyContent).ToString();
+            var result = JsonConvert.DeserializeObject<TestClass>(resultJson);
 
-            var response = await _server.HttpClient.GetAsync($"/employee/{_version}/{id}");
-            var responseBodyContent = await response.Content.ReadAsStringAsync();
-            var jsonResult = JsonConvert.DeserializeObject<TestClass>(responseBodyContent);
-            
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.IsNotNull(jsonResult);
-            Assert.That(jsonResult.EmployeeReference, Is.EqualTo(_testClass.EmployeeReference));
+            Assert.That(result.EmployeeReference, Is.EqualTo(_testClass.EmployeeReference));
         }
     }
 
