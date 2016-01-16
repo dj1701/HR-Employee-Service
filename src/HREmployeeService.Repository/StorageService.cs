@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using HREmployeeService.Repository.Exceptions;
+using HREmployeeService.Repository.Interfaces;
 using HREmployeeService.Repository.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -8,15 +9,14 @@ namespace HREmployeeService.Repository
 {
     public class StorageService : IStorageService
     {
-        private const string ConnectionString = "mongodb://localhost";
         private const string DbName = "hr-employee";
+        private const string CollectionName = "employees";
         private readonly IMongoCollection<EmployeeData> _collection;
 
-        public StorageService()
+        public StorageService(IMongoProvider provider)
         {
-            var client = new MongoClient(ConnectionString);
-            var db = client.GetDatabase(DbName);
-            _collection = db.GetCollection<EmployeeData>("employees");
+            provider.GetDatabase(DbName);
+            _collection = provider.GetCollection<EmployeeData>(CollectionName);
         }
 
         public async Task<string> Create(string version, object payload)
@@ -71,9 +71,7 @@ namespace HREmployeeService.Repository
 
             try
             {
-                var builder = Builders<EmployeeData>.Filter;
-                var filter = builder.Eq("_id", id) & builder.Eq("Version", version);
-                result = await _collection.Find(filter).FirstOrDefaultAsync();
+                result = await _collection.FindAsync(x => x.Version == version && x.Id == id).Result.FirstOrDefaultAsync();
             }
             catch (MongoException)
             {

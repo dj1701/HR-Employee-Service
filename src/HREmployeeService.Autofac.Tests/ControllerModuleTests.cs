@@ -13,8 +13,9 @@ namespace HREmployeeService.Autofac.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterModule(new ControllerModule());
+            builder.RegisterModule(new RepositoryModule());
             builder.RegisterModule(new StorageServiceModule());
+            builder.RegisterModule(new ControllerModule());
             
             _container = builder.Build();
         }

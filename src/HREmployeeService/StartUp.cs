@@ -17,6 +17,7 @@ namespace HREmployeeService
             var builder = new ContainerBuilder();
             builder.RegisterModule(new ControllerModule());
             builder.RegisterModule(new StorageServiceModule());
+            builder.RegisterModule(new RepositoryModule());
 
             _container = builder.Build();
 

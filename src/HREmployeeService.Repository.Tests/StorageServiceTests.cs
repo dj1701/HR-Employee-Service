@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HREmployeeService.Repository.Exceptions;
+using HREmployeeService.Repository.Interfaces;
+using HREmployeeService.Repository.Tests.Helpers;
+using HREmployeeService.Repository.Tests.Stubs;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,11 +18,16 @@ namespace HREmployeeService.Repository.Tests
         private TestPayload _testPayload;
         private string _expectedEmployeeReference;
         private string _version;
+        private IMongoProvider _provider;
+        private CollectionStub _conllection;
 
         [SetUp]
         public void SetUpBeforeEachTest()
         {
-            _unitUnderTest = new StorageService();
+            _conllection = new CollectionStub();
+            _provider = new ProviderStub(_conllection);
+
+            _unitUnderTest = new StorageService(_provider);
             _expectedEmployeeReference = "abc";
 
             var testClass = new TestClass
@@ -66,6 +74,7 @@ namespace HREmployeeService.Repository.Tests
         public async Task ShouldOnReadEmployeeDataByIdAndVersion()
         {
             var id = await _unitUnderTest.Create(_version, _testPayload.Data);
+
             var response = await _unitUnderTest.Read(_version, id);
             Assert.IsNotNull(response);
 
@@ -103,6 +112,7 @@ namespace HREmployeeService.Repository.Tests
         [Test]
         public async Task ShouldOnUpdateReturnFalseIfInvalidIdIsGiven()
         {
+            await _unitUnderTest.Create(_version, _testPayload.Data);
             var payload = new TestPayload { Data = _testPayload };
             const string invalidId = "1234";
             var result = await _unitUnderTest.Update(_version, invalidId, payload.Data);
@@ -117,6 +127,8 @@ namespace HREmployeeService.Repository.Tests
             const string invalidVersion = "1234";
 
             var id = await _unitUnderTest.Create(_version, _testPayload.Data);
+
+            _conllection.SetFindOneAndUpdateAsyncToReturnNull = true;
             var result = await _unitUnderTest.Update(invalidVersion, id, payload.Data);
 
             Assert.That(result, Is.EqualTo(false));
@@ -129,27 +141,5 @@ namespace HREmployeeService.Repository.Tests
                 Throws.TypeOf<MissingManatoryDataArgumentException>()
                     .With.Message.EqualTo("Update - Supplied arguments is null"));
         }
-    }
-
-    internal class TestClass
-    {
-        public int Id { get; set; }
-        public string EmployeeReference { get; set; }
-        public string ForeName { get; set; }
-        public string MiddleName { get; set; }
-        public string Surname { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public DateTime EmployeeStartDate { get; set; }
-        public DateTime EmployeeEndDate { get; set; }
-        public string NationalInsurance { get; set; }
-        public string PlaceOfBirth { get; set; }
-        public string EmailAddress { get; set; }
-        public string HomePhone { get; set; }
-        public string MobilePhone { get; set; }
-    }
-
-    internal class TestPayload
-    {
-        public object Data { get; set; }
     }
 }

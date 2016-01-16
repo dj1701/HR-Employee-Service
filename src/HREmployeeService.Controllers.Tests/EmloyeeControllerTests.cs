@@ -4,6 +4,7 @@ using System.Web.Http.Results;
 using FakeItEasy;
 using HREmployeeService.Controllers.Models;
 using HREmployeeService.Repository;
+using HREmployeeService.Repository.Interfaces;
 using Newtonsoft.Json;
 using NUnit.Framework;
 

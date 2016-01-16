@@ -1,32 +1,31 @@
 ﻿using Autofac;
-using NUnit.Framework;
 using HREmployeeService.Repository;
 using HREmployeeService.Repository.Interfaces;
+using NUnit.Framework;
 
 namespace HREmployeeService.Autofac.Tests
 {
     [TestFixture]
-    public class StorageServiceModuleTests : Module
+    public class RepositoryModuleTests
     {
         private IContainer _container;
 
         [SetUp]
-        public void SetUp()
+        public void SetUpBeforeTest()
         {
             var builder = new ContainerBuilder();
 
             builder.RegisterModule(new RepositoryModule());
-            builder.RegisterModule(new StorageServiceModule());
 
             _container = builder.Build();
         }
 
         [Test]
-        public void resolves_StorageServiceModule()
+        public void resolves_RepositoryModule()
         {
-            var result = _container.Resolve<IStorageService>();
+            var result = _container.Resolve<IMongoProvider>();
 
-            Assert.That(result, Is.InstanceOf<StorageService>());
+            Assert.That(result, Is.InstanceOf<MongoProvider>());
         }
     }
 }

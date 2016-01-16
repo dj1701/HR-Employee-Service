@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using HREmployeeService.Controllers.Models;
 using HREmployeeService.Repository;
+using HREmployeeService.Repository.Interfaces;
 
 namespace HREmployeeService.Controllers
 {

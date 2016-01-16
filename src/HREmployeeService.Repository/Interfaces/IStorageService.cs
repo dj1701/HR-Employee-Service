@@ -1,7 +1,6 @@
-﻿using System.Reflection.Emit;
 using System.Threading.Tasks;
 
-namespace HREmployeeService.Repository
+namespace HREmployeeService.Repository.Interfaces
 {
     public interface IStorageService
     {

@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="ControllerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RepositoryModule.cs" />
     <Compile Include="StorageServiceModule.cs" />
   </ItemGroup>
   <ItemGroup>

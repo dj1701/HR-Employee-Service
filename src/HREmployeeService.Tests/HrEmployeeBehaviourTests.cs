@@ -22,7 +22,7 @@ namespace HREmployeeService.Tests
         private HttpRequestMessage _request;
 
         [SetUp]
-        public void SetUp()
+        public void SetUpBeforeEachTest()
         {
             _server = TestServer.Create<StartUp>();
 
